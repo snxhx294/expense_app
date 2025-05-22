@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Subcategory</h2>
+<form method="post">
+    <div class="mb-3">
+        <label for="subcategory_name" class="form-label">Subcategory Name</label>
+        <input type="text" id="subcategory_name" name="subcategory_name" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Subcategory</button>
+</form>
+{% endblock %}
