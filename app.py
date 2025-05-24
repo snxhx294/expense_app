@@ -196,11 +196,31 @@ def delete_expense_by_id(expense_id):
 @login_required
 def edit_expense(expense_id):
     if request.method == 'POST':
-        # Handle form submission
-        pass
-    expense = get_expense_by_id(expense_id)  # Replace with your function to fetch the expense
-    categories = get_all_categories()       # Replace with your function to fetch categories
-    subcategories = get_all_subcategories() # Replace with your function to fetch subcategories
+        # Fetch updated data from the form
+        category_id = request.form.get('category')
+        subcategory_id = request.form.get('subcategory')
+        amount = request.form.get('amount')
+        title = request.form.get('title')
+        description = request.form.get('description')
+
+        try:
+            with mysql.connector.connect(**db_config) as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE expenses
+                    SET category_id = %s, subcategory_id = %s, amount = %s, title = %s, description = %s
+                    WHERE id = %s AND user_id = %s
+                """, (category_id, subcategory_id, amount, title, description, expense_id, session['user_id']))
+                conn.commit()
+            flash("Expense updated successfully!")
+            return redirect('/view_expenses')
+        except mysql.connector.Error as err:
+            flash(f"Error updating expense: {err}")
+
+    # Fetch the current expense details for the form
+    expense = get_expense_by_id(expense_id)
+    categories = get_all_categories()
+    subcategories = get_all_subcategories()
     return render_template('edit_expense.html', expense=expense, categories=categories, subcategories=subcategories)
 
 # Route: Delete Expense
@@ -216,6 +236,137 @@ def delete_expense(expense_id):
     expense = get_expense_by_id(expense_id)  # Replace with your function to fetch the expense
     return render_template('delete_expense.html', expense=expense)
 
+# Route: Manage Categories
+@app.route('/categories', methods=['GET'])
+@login_required
+def manage_categories():
+    try:
+        # Fetch all categories and subcategories
+        with mysql.connector.connect(**db_config) as conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM categories")
+            categories = cursor.fetchall()
+
+            cursor.execute("SELECT * FROM subcategories")
+            subcategories = cursor.fetchall()
+
+        # Render the management page
+        return render_template(
+            "manage_categories.html",
+            categories=categories,
+            subcategories=subcategories
+        )
+    except mysql.connector.Error as err:
+        flash(f"Error fetching categories: {err}", "danger")
+        return redirect('/view_expenses')
+
+# Route: Edit Category
+@app.route('/edit_category/<int:category_id>', methods=['GET', 'POST'])
+@login_required
+def edit_category(category_id):
+    if request.method == 'POST':
+        new_name = request.form['name']
+
+        try:
+            # Update the category name
+            with mysql.connector.connect(**db_config) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE categories SET name = %s WHERE id = %s",
+                    (new_name, category_id)
+                )
+                conn.commit()
+
+            flash("Category updated successfully!", "success")
+            return redirect('/manage_categories')
+        except mysql.connector.Error as err:
+            flash(f"Error updating category: {err}", "danger")
+
+    # Fetch the category details for the form
+    try:
+        with mysql.connector.connect(**db_config) as conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM categories WHERE id = %s", (category_id,))
+            category = cursor.fetchone()
+
+        if not category:
+            flash("Category not found.", "danger")
+            return redirect('/manage_categories')
+
+        return render_template("edit_category.html", category=category)
+    except mysql.connector.Error as err:
+        flash(f"Error fetching category: {err}", "danger")
+        return redirect('/manage_categories')
+
+# Route: Delete Category
+@app.route('/delete_category/<int:category_id>', methods=['POST'])
+@login_required
+def delete_category(category_id):
+    try:
+        with mysql.connector.connect(**db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM categories WHERE id = %s", (category_id,))
+            conn.commit()
+
+        flash("Category deleted successfully!", "success")
+    except mysql.connector.Error as err:
+        flash(f"Error deleting category: {err}", "danger")
+
+    return redirect('/manage_categories')
+
+# Route: Edit Subcategory
+@app.route('/edit_subcategory/<int:subcategory_id>', methods=['GET', 'POST'])
+@login_required
+def edit_subcategory(subcategory_id):
+    if request.method == 'POST':
+        new_name = request.form['name']
+
+        try:
+            # Update the subcategory name
+            with mysql.connector.connect(**db_config) as conn:
+                cursor = conn.cursor()
+                cursor.execute(
+                    "UPDATE subcategories SET name = %s WHERE id = %s",
+                    (new_name, subcategory_id)
+                )
+                conn.commit()
+
+            flash("Subcategory updated successfully!", "success")
+            return redirect('/manage_categories')
+        except mysql.connector.Error as err:
+            flash(f"Error updating subcategory: {err}", "danger")
+
+    # Fetch the subcategory details for the form
+    try:
+        with mysql.connector.connect(**db_config) as conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT * FROM subcategories WHERE id = %s", (subcategory_id,))
+            subcategory = cursor.fetchone()
+
+        if not subcategory:
+            flash("Subcategory not found.", "danger")
+            return redirect('/manage_categories')
+
+        return render_template("edit_subcategory.html", subcategory=subcategory)
+    except mysql.connector.Error as err:
+        flash(f"Error fetching subcategory: {err}", "danger")
+        return redirect('/manage_categories')
+
+# Route: Delete Subcategory
+@app.route('/delete_subcategory/<int:subcategory_id>', methods=['POST'])
+@login_required
+def delete_subcategory(subcategory_id):
+    try:
+        with mysql.connector.connect(**db_config) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM subcategories WHERE id = %s", (subcategory_id,))
+            conn.commit()
+
+        flash("Subcategory deleted successfully!", "success")
+    except mysql.connector.Error as err:
+        flash(f"Error deleting subcategory: {err}", "danger")
+
+    return redirect('/manage_categories')
 
 if __name__ == '__main__':
     app.run(debug=True)
