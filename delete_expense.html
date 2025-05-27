@@ -1,0 +1,33 @@
+<!-- delete_expense.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-danger mb-4">Confirm Deletion</h2>
+    <p>Are you sure you want to delete the following expense?</p>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Payment Method</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ expense['date'] }}</td>
+                <td>{{ expense['amount'] }}</td>
+                <td>{{ expense['category'] }}</td>
+                <td>{{ expense['subcategory'] }}</td>
+                <td>{{ expense['description'] }}</td>
+            </tr>
+        </tbody>
+    </table>
+    <form method="post" action="{{ url_for('delete_expense', expense_id=expense['id']) }}">
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{{ url_for('view_expenses') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

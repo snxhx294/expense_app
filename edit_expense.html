@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Expense</h2>
+    <form method="post" action="{{ url_for('edit_expense', expense_id=expense['id']) }}">
+        <div class="mb-3">
+        <label for="date" class="form-label">Date</label>
+        <input 
+            type="date" 
+            class="form-control" 
+            id="date" 
+            name="date" 
+            value="{{ expense['date'] }}" 
+            required>
+        </div>
+        <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <input 
+                type="number" 
+                class="form-control" 
+                id="amount" 
+                name="amount" 
+                value="{{ expense['amount'] }}" 
+                required>
+        </div>
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select 
+                class="form-select" 
+                id="category" 
+                name="category" 
+                required>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if expense['category_id'] == category.id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="subcategory" class="form-label">Payment Method</label>
+            <select 
+                class="form-select" 
+                id="subcategory" 
+                name="subcategory">
+                {% for subcategory in subcategories %}
+                <option value="{{ subcategory.id }}" {% if expense['subcategory_id'] == subcategory.id %}selected{% endif %}>
+                    {{ subcategory.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea 
+                class="form-control" 
+                id="description" 
+                name="description" 
+                rows="3">{{ expense['description'] }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Expense</button>
+        <a href="{{ url_for('view_expenses') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

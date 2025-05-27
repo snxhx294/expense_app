@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="p-5 bg-light rounded shadow">
+        <h1 class="display-4 text-primary font-weight-bold">Welcome to the Expense Tracker</h1>
+        <p class="lead mt-3 mb-5 text-secondary">
+            Effortlessly manage your finances with ease and precision.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+            <a href="/register" class="btn btn-primary btn-lg px-5 py-2 shadow-sm">
+                <i class="fas fa-user-plus"></i> Register
+            </a>
+            <a href="/login" class="btn btn-success btn-lg px-5 py-2 shadow-sm">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container {
+        background: linear-gradient(to right, #e3f2fd, #ffffff);
+        padding: 40px;
+        border-radius: 15px;
+    }
+
+    h1 {
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn {
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .shadow {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+</style>
+{% endblock %}

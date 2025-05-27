@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Add Payment Method</h2>
+<form method="post">
+    <label for="payment_method_name">Payment Method Name:</label>
+    <input type="text" id="payment_method_name" name="payment_method_name" required>
+    <button type="submit">Add Payment Method</button>
+</form>
+{% endblock %}

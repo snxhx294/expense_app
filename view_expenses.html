@@ -1,0 +1,35 @@
+<!-- view_expenses.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>View Expenses</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Payment Method</th>
+            <th>Description</th>
+            <th>Actions</th> <!-- new column -->
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.date }}</td>
+            <td>{{ expense.amount }}</td>
+            <td>{{ expense.category }}</td>
+            <td>{{ expense.subcategory }}</td>
+            <td>{{ expense.description }}</td>
+            <td>
+                <!-- Use url_for for dynamic URL generation -->
+                <a href="{{ url_for('edit_expense', expense_id=expense.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                <form method="post" action="{{ url_for('delete_expense', expense_id=expense.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure?');">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
