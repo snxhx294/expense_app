@@ -117,7 +117,7 @@ def add_expense():
 @app.route('/view_expenses', methods=['GET'])
 @login_required
 def view_expenses():
-    # Retrieve filter parameters from query string
+    # Retrieve filter parameters
     filter_date = request.args.get('date')
     filter_category = request.args.get('category')
     filter_payment = request.args.get('payment_method')
@@ -132,7 +132,7 @@ def view_expenses():
     """
     params = [session['user_id']]
 
-    # Add filters dynamically
+    # Add filters
     if filter_date:
         query += " AND e.date = %s"
         params.append(filter_date)
@@ -143,18 +143,18 @@ def view_expenses():
         query += " AND sc.name = %s"
         params.append(filter_payment)
 
-    # Execute the query
+    # Execute query
     expenses = fetch_all(query, tuple(params))
 
-    # Fetch unique categories and subcategories for dropdowns
-    categories = fetch_all("SELECT DISTINCT name FROM categories")
-    subcategories = fetch_all("SELECT DISTINCT name FROM subcategories")
+    # Fetch dropdown data
+    categories = fetch_all("SELECT name FROM categories")
+    subcategories = fetch_all("SELECT name FROM subcategories")
 
     return render_template(
         'view_expenses.html',
         expenses=expenses,
         categories=[c['name'] for c in categories],
-        subcategories=[sc['name'] for sc in subcategories]
+        payment_methods=[sc['name'] for sc in subcategories],
     )
 
 # Route: Add Category
