@@ -2,6 +2,37 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>View Expenses</h2>
+<!-- Filters -->
+<form method="get" action="{{ url_for('view_expenses') }}" class="mb-3">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="filter-date" class="form-label">Date</label>
+            <input type="date" id="filter-date" name="date" class="form-control" value="{{ request.args.get('date', '') }}">
+        </div>
+        <div class="col-md-3">
+            <label for="filter-category" class="form-label">Category</label>
+            <select id="filter-category" name="category" class="form-select">
+                <option value="">All</option>
+                {% for category in categories %}
+                <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>{{ category }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="filter-payment" class="form-label">Payment Method</label>
+            <select id="filter-payment" name="payment_method" class="form-select">
+                <option value="">All</option>
+                {% for method in payment_methods %}
+                <option value="{{ method }}" {% if request.args.get('payment_method') == method %}selected{% endif %}>{{ method }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 align-self-end">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+</form>
+<!-- Expenses Table -->
 <table class="table table-bordered">
     <thead>
         <tr>
