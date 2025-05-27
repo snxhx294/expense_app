@@ -113,18 +113,49 @@ def add_expense():
     subcategories = fetch_all("SELECT id, name FROM subcategories")
     return render_template('add_expense.html', categories=categories, subcategories=subcategories)
 
-# Route: View Expenses
+#Route: View Expenses
 @app.route('/view_expenses', methods=['GET'])
 @login_required
 def view_expenses():
-    expenses = fetch_all("""
-    SELECT e.id, e.date, e.amount, e.description, c.name AS category, sc.name AS subcategory
-    FROM expenses e
-    JOIN categories c ON e.category_id = c.id
-    JOIN subcategories sc ON e.subcategory_id = sc.id
-    WHERE e.user_id = %s
-    """, (session['user_id'],))
-    return render_template('view_expenses.html', expenses=expenses)
+    # Retrieve filter parameters from query string
+    filter_date = request.args.get('date')
+    filter_category = request.args.get('category')
+    filter_payment = request.args.get('payment_method')
+
+    # Base SQL query
+    query = """
+        SELECT e.id, e.date, e.amount, e.description, c.name AS category, sc.name AS subcategory
+        FROM expenses e
+        JOIN categories c ON e.category_id = c.id
+        JOIN subcategories sc ON e.subcategory_id = sc.id
+        WHERE e.user_id = %s
+    """
+    params = [session['user_id']]
+
+    # Add filters dynamically
+    if filter_date:
+        query += " AND e.date = %s"
+        params.append(filter_date)
+    if filter_category:
+        query += " AND c.name = %s"
+        params.append(filter_category)
+    if filter_payment:
+        query += " AND sc.name = %s"
+        params.append(filter_payment)
+
+    # Execute the query
+    expenses = fetch_all(query, tuple(params))
+
+    # Fetch unique categories and subcategories for dropdowns
+    categories = fetch_all("SELECT DISTINCT name FROM categories")
+    subcategories = fetch_all("SELECT DISTINCT name FROM subcategories")
+
+    return render_template(
+        'view_expenses.html',
+        expenses=expenses,
+        categories=[c['name'] for c in categories],
+        subcategories=[sc['name'] for sc in subcategories]
+    )
 
 # Route: Add Category
 @app.route('/add_category', methods=['GET', 'POST'])
