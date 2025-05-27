@@ -1,7 +1,7 @@
-<!-- view_expenses.html -->
 {% extends "base.html" %}
 {% block content %}
 <h2>View Expenses</h2>
+
 <!-- Filters -->
 <form method="get" action="{{ url_for('view_expenses') }}" class="mb-3">
     <div class="row">
@@ -14,7 +14,9 @@
             <select id="filter-category" name="category" class="form-select">
                 <option value="">All</option>
                 {% for category in categories %}
-                <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>{{ category }}</option>
+                <option value="{{ category }}" {% if request.args.get('category') == category %}selected{% endif %}>
+                    {{ category }}
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -23,7 +25,9 @@
             <select id="filter-payment" name="payment_method" class="form-select">
                 <option value="">All</option>
                 {% for method in payment_methods %}
-                <option value="{{ method }}" {% if request.args.get('payment_method') == method %}selected{% endif %}>{{ method }}</option>
+                <option value="{{ method }}" {% if request.args.get('payment_method') == method %}selected{% endif %}>
+                    {{ method }}
+                </option>
                 {% endfor %}
             </select>
         </div>
@@ -32,6 +36,7 @@
         </div>
     </div>
 </form>
+
 <!-- Expenses Table -->
 <table class="table table-bordered">
     <thead>
@@ -41,7 +46,7 @@
             <th>Category</th>
             <th>Payment Method</th>
             <th>Description</th>
-            <th>Actions</th> <!-- new column -->
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
