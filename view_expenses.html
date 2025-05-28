@@ -4,13 +4,19 @@
 
 <!-- Filters-->
 <form method="get" action="{{ url_for('view_expenses') }}" class="mb-3">
-    <div class="row">
-        <div class="col-md-3">
-            <label for="filter-date" class="form-label">Date</label>
-            <input type="date" id="filter-date" name="date" class="form-control" value="{{ request.args.get('date', '') }}">
+    <div class="d-flex flex-wrap align-items-center">
+        <div class="me-3">
+            <label for="start-date" class="form-label">Start Date:</label>
+            <input type="date" id="start-date" name="start_date" class="form-control"
+                   value="{{ start_date or '' }}">
         </div>
-        <div class="col-md-3">
-            <label for="filter-category" class="form-label">Category</label>
+        <div class="me-3">
+            <label for="end-date" class="form-label">End Date:</label>
+            <input type="date" id="end-date" name="end_date" class="form-control"
+                   value="{{ end_date or '' }}">
+        </div>
+        <div class="me-3">
+            <label for="filter-category" class="form-label">Category:</label>
             <select id="filter-category" name="category" class="form-select">
                 <option value="">All</option>
                 {% for category in categories %}
@@ -20,8 +26,8 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-3">
-            <label for="filter-payment" class="form-label">Payment Method</label>
+        <div class="me-3">
+            <label for="filter-payment" class="form-label">Payment Method:</label>
             <select id="filter-payment" name="payment_method" class="form-select">
                 <option value="">All</option>
                 {% for method in payment_methods %}
@@ -31,8 +37,19 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-3 align-self-end">
-            <button type="submit" class="btn btn-primary">Filter</button>
+        <div class="me-3">
+            <label for="min-amount" class="form-label">Min Amount:</label>
+            <input type="number" id="min-amount" name="min_amount" class="form-control"
+                   value="{{ min_amount or '' }}" placeholder="e.g. 100">
+        </div>
+        <div class="me-3">
+            <label for="max-amount" class="form-label">Max Amount:</label>
+            <input type="number" id="max-amount" name="max_amount" class="form-control"
+                   value="{{ max_amount or '' }}" placeholder="e.g. 500">
+        </div>
+        <div class="d-flex align-items-end mt-3">
+            <button type="submit" class="btn btn-primary me-2">Filter</button>
+            <a href="{{ url_for('view_expenses') }}" class="btn btn-secondary">Remove All Filters</a>
         </div>
     </div>
 </form>
@@ -52,7 +69,7 @@
     <tbody>
         {% for expense in expenses %}
         <tr>
-            <td>{{ expense.date }}</td>
+            <td>{{ expense.formatted_date }}</td>
             <td>{{ expense.amount }}</td>
             <td>{{ expense.category }}</td>
             <td>{{ expense.subcategory }}</td>
