@@ -118,30 +118,40 @@ def add_expense():
 @app.route('/view_expenses', methods=['GET'])
 @login_required
 def view_expenses():
-    filter_date = request.args.get('date')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
     filter_category = request.args.get('category')
     filter_payment = request.args.get('payment_method')
+    min_amount = request.args.get('min_amount')
+    max_amount = request.args.get('max_amount')
 
     query = """
-        SELECT e.id, e.date, e.amount, e.description,
-               c.name AS category,
-               sc.name AS subcategory
-        FROM expenses e
-        JOIN categories c ON e.category_id = c.id
-        JOIN subcategories sc ON e.subcategory_id = sc.id
-        WHERE e.user_id = %s
+        SELECT e.id, DATE_FORMAT(e.date, '%d-%m-%Y') AS formatted_date,
+           e.amount, e.description,
+           c.name AS category,
+           sc.name AS subcategory
+    FROM expenses e
+    JOIN categories c ON e.category_id = c.id
+    JOIN subcategories sc ON e.subcategory_id = sc.id
+    WHERE e.user_id = %s
     """
     params = [session['user_id']]
 
-    if filter_date:
-        query += " AND e.date = %s"
-        params.append(filter_date)
+    if start_date and end_date:
+        query += " AND e.date BETWEEN %s AND %s"
+        params.extend([start_date, end_date])
     if filter_category:
         query += " AND c.name = %s"
         params.append(filter_category)
     if filter_payment:
         query += " AND sc.name = %s"
         params.append(filter_payment)
+    if min_amount:
+        query += " AND e.amount >= %s"
+        params.append(min_amount)
+    if max_amount:
+        query += " AND e.amount <= %s"
+        params.append(max_amount)
 
     # Execute the query
     try:
@@ -169,7 +179,11 @@ def view_expenses():
         'view_expenses.html',
         expenses=expenses,
         categories=[c['name'] for c in categories],
-        payment_methods=[p['name'] for p in payment_methods]
+        payment_methods=[p['name'] for p in payment_methods],
+        start_date=start_date,
+        end_date=end_date,
+        min_amount=min_amount,
+        max_amount=max_amount
     )
 
 # Route: Add Category
