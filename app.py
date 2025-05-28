@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request, redirect, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -91,7 +92,7 @@ def login():
 def add_expense():
     if request.method == 'POST':
         category_id = request.form.get('category')
-        subcategory_id = request.form.get('subcategory')
+        subcategory_id = request.form.get('payment_method')  # <-- changed here
         amount = request.form.get('amount')
         date = request.form.get('date')
         description = request.form.get('description')
@@ -117,14 +118,14 @@ def add_expense():
 @app.route('/view_expenses', methods=['GET'])
 @login_required
 def view_expenses():
-    # Retrieve filter parameters
     filter_date = request.args.get('date')
     filter_category = request.args.get('category')
     filter_payment = request.args.get('payment_method')
 
-    # Base SQL query
     query = """
-        SELECT e.id, e.date, e.amount, e.description, c.name AS category, sc.name AS subcategory
+        SELECT e.id, e.date, e.amount, e.description,
+               c.name AS category,
+               sc.name AS subcategory
         FROM expenses e
         JOIN categories c ON e.category_id = c.id
         JOIN subcategories sc ON e.subcategory_id = sc.id
@@ -132,7 +133,6 @@ def view_expenses():
     """
     params = [session['user_id']]
 
-    # Add filters
     if filter_date:
         query += " AND e.date = %s"
         params.append(filter_date)
@@ -143,18 +143,33 @@ def view_expenses():
         query += " AND sc.name = %s"
         params.append(filter_payment)
 
-    # Execute query
-    expenses = fetch_all(query, tuple(params))
+    # Execute the query
+    try:
+        with mysql.connector.connect(**db_config) as conn:
+            cursor = conn.cursor(dictionary=True)  # Return results as dicts
+            cursor.execute(query, tuple(params))
+            expenses = cursor.fetchall()
 
-    # Fetch dropdown data
-    categories = fetch_all("SELECT name FROM categories")
-    subcategories = fetch_all("SELECT name FROM subcategories")
+        # Debug print to console (check server log)
+        print("Fetched expenses:", expenses)
+
+    except mysql.connector.Error as err:
+        flash(f"Error retrieving expenses: {err}")
+        expenses = []
+
+    # Fetch categories and payment methods for filters or dropdowns
+    with mysql.connector.connect(**db_config) as conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT name FROM categories")
+        categories = cursor.fetchall()
+        cursor.execute("SELECT name FROM subcategories")
+        payment_methods = cursor.fetchall()
 
     return render_template(
         'view_expenses.html',
         expenses=expenses,
         categories=[c['name'] for c in categories],
-        payment_methods=[sc['name'] for sc in subcategories],
+        payment_methods=[p['name'] for p in payment_methods]
     )
 
 # Route: Add Category
